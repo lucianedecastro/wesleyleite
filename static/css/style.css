@@ -1,0 +1,41 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5; /* Cor de fundo da página */
+    margin: 0; /* Remove a margem padrão do body */
+    color: #333; /* Cor do texto */
+  }
+  
+  h1 {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #2196F3; /* Cor do título */
+  }
+  
+  #menu {
+    background-color: #fff;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Adiciona sombra aos botões */
+  }
+  
+  #menu button {
+    padding: 10px 20px;
+    margin: 5px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px; /* Adiciona cantos arredondados */
+    transition: background-color 0.3s ease; /* Adiciona transição para o background */
+  }
+  
+  #menu button:hover {
+    background-color: #3e8e41; /* Muda a cor do fundo ao passar o mouse */
+  }
+  
+  #conteudo {
+    background-color: #fff;
+    padding: 20px;
+    margin: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
