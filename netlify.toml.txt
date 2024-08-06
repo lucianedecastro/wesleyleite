@@ -1,7 +1,6 @@
 [build]
-  publish = "build"  # ou o diretório correto
-  command = "npm run build"  # ou o comando de build apropriado
+command = "pip install -r requirements.txt && flask build"
+publish = "build" 
 
 
-[context.production.environment]
-GITHUB_TOKEN = "<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>"
+
