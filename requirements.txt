@@ -14,7 +14,7 @@ itsdangerous==2.2.0
 Jinja2==3.1.4
 MarkupSafe==2.1.5
 mysql-connector-python==8.4.0
-numpy==1.24.4
+numpy==2.0.1
 pandas==2.2.2
 platformdirs==4.2.2
 pygeoif==0.7
@@ -28,4 +28,5 @@ urllib3==2.2.2
 virtualenv==20.26.3
 Werkzeug==3.0.3
 xyzservices==2024.6.0
+
 
