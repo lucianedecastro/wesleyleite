@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Plataforma de Desempenho do Atleta</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <h1>Plataforma de Desempenho</h1>
+
+  <div id="menu">
+    <h2>Menu</h2>
+    <button onclick="registrarTreinoMar()">1. Registrar treino no mar</button>
+    <button onclick="registrarTreinoAcademia()">2. Registrar treino na academia</button>
+    <button onclick="adicionarInformacoesEtapa()">3. Adicionar informações da etapa</button>
+    <button onclick="obterPrognostico()">4. Obter prognóstico</button>
+    <button onclick="sair()">5. Sair</button>
+  </div>
+
+  <div id="conteudo">
+    </div>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
