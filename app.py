@@ -86,8 +86,9 @@ def obter_prognostico():
     notas = atleta["notas_etapas"]
     colocacoes = atleta["colocacoes_etapas"]
     variaveis_extras = atleta["variaveis_extras"]
+    impactos_extras = atleta["impactos_extras"]
 
-    X, y = preparar_dados_prognostico(notas, colocacoes, variaveis_extras)
+    X, y = preparar_dados_prognostico(notas, colocacoes, variaveis_extras, impactos_extras)
     modelo = criar_modelo_prognostico(X, y)
 
     prognostico = modelo.predict([[
@@ -102,7 +103,7 @@ def obter_prognostico():
     return jsonify({"prognostico": f"Prognóstico: {prognostico:.2f}"})
 
 # Preparar dados para o modelo de prognóstico
-def preparar_dados_prognostico(notas, colocacoes, variaveis_extras):
+def preparar_dados_prognostico(notas, colocacoes, variaveis_extras, impactos_extras):
     X = []
     y = np.array([nota for nota in notas if nota is not None])
 
@@ -127,14 +128,15 @@ def preparar_dados_prognostico(notas, colocacoes, variaveis_extras):
 
     X = np.array(X)
     if variaveis_extras:
-        X[:, 3:] = encoder.transform(X[:, 3:]).toarray()
+        # Aplicar OneHotEncoder apenas nas features extras
+        X[:, 3:] = encoder.transform(X[:, 3:])
+    # Aplicar StandardScaler
+    X = StandardScaler().fit_transform(X)
 
     return X, y
 
 # Criar o modelo de prognóstico
 def criar_modelo_prognostico(X, y):
-    # Aplica o StandardScaler
-    X = StandardScaler().fit_transform(X)
 
     modelo = LinearRegression()
     modelo.fit(X, y)
@@ -143,6 +145,3 @@ def criar_modelo_prognostico(X, y):
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
