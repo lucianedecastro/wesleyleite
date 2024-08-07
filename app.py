@@ -350,7 +350,7 @@ assets.register('all_css', css)
 
 @app.cli.command('build')
 def build():
-    assets.build('all_css')
+    assets.build('all_css') 
 
 if __name__ == "__main__":
     app.run(debug=True)
