@@ -1,10 +1,15 @@
-from flask import Flask, render_template, request, jsonify
+import os
 import json
-import numpy as np
+import logging
+from flask import Flask, render_template, request, jsonify
 from flask_assets import Environment, Bundle
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
-import logging
+import numpy as np
+
+# Criar a pasta build, se não existir
+if not os.path.exists('build'):
+    os.makedirs('build')
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
@@ -111,9 +116,9 @@ def preparar_dados_prognostico(notas, colocacoes, variaveis_extras, impactos_ext
     encoder = OneHotEncoder(handle_unknown='ignore', sparse=False)
     features_extras = []
     if variaveis_extras:
-        features_extras = encoder.fit_transform([[valor for valor em variaveis_extras.values()]]).toarray()[0]
+        features_extras = encoder.fit_transform([[valor for valor in variaveis_extras.values()]]).toarray()[0]
 
-    for i, (nota, colocacao) em enumerate(zip(notas, colocacoes)):
+    for i, (nota, colocacao) in enumerate(zip(notas, colocacoes)):
         if nota is not None:
             features = [
                 colocacao,
@@ -140,24 +145,24 @@ def preparar_dados_prognostico(notas, colocacoes, variaveis_extras, impactos_ext
 def criar_modelo_prognostico(X, y):
     modelo = LinearRegression()
     modelo.fit(X, y)
-
     return modelo
 
+# Classe Atleta e suas funcionalidades
 class Atleta:
     def __init__(self, nome):
         self.nome = nome
         self.treinos_mar = []
         self.treinos_academia = []
-        self.notas_etapas = [None] * 4 # Lista para armazenar notas das 4 etapas
-        self.colocacoes_etapas = [None] * 4 # Lista para armazenar colocações das 4 etapas
+        self.notas_etapas = [None] * 4
+        self.colocacoes_etapas = [None] * 4
         self.variaveis_extras = {}
-        self.impactos_extras = {} # Dicionário para armazenar impactos das variáveis extras
+        self.impactos_extras = {}
         self.modelo_prognostico = None
-        self.encoder = None  # Armazena o encoder para uso posterior
-        self.features_extras_names = []  # Armazena os nomes das features extras
-        self.scaler = StandardScaler()  # Cria o StandardScaler aqui
-        self.treino_mar_nota = 1 # Inicializa a nota do treino no mar
-        self.treino_academia_nota = 1 # Inicializa a nota do treino na academia
+        self.encoder = None
+        self.features_extras_names = []
+        self.scaler = StandardScaler()
+        self.treino_mar_nota = 1
+        self.treino_academia_nota = 1
 
     def registrar_treino_mar(self):
         resposta = input("Realizou treino no mar hoje? (sim/não): ")
@@ -193,76 +198,32 @@ class Atleta:
 
     def adicionar_variavel_extra(self, nome, impacto):
         if 1 <= impacto <= 5:
-            self.variaveis_extras[nome] = " " # Adiciona um espaço para a variável (opcional)
+            self.variaveis_extras[nome] = " "
             self.impactos_extras[nome] = impacto
             print(f"Variável extra '{nome}' com impacto {impacto} registrada.")
             self.treinar_modelo_prognostico()
         else:
-            print("Impacto inválido. Digite um valor entre 1 e 5.")
+            print("Impacto inválido. Digite um número entre 1 e 5.")
 
     def treinar_modelo_prognostico(self):
-        # Preparar os dados para o modelo
-        X = []
-        y = []
+        if len(self.notas_etapas) >= 4:
+            X, y = preparar_dados_prognostico(self.notas_etapas, self.colocacoes_etapas, self.variaveis_extras, self.impactos_extras)
+            self.modelo_prognostico = criar_modelo_prognostico(X, y)
+            print("Modelo de prognóstico treinado com sucesso.")
 
-        for i, nota in enumerate(self.notas_etapas):
-            if nota is not None:
-                colocacao = self.colocacoes_etapas[i] or 0
-                variaveis_extras_valores = list(self.variaveis_extras.values()) if self.variaveis_extras else []
-                impacto_extras_valores = list(self.impactos_extras.values()) if self.impactos_extras else []
-
-                # Construir o vetor de features
-                features = [colocacao, len(self.treinos_mar), len(self.treinos_academia), self.treino_mar_nota, self.treino_academia_nota] + variaveis_extras_valores + impacto_extras_valores
-                X.append(features)
-                y.append(nota)
-
-        if not X or not y:
-            print("Dados insuficientes para treinar o modelo.")
-            return
-
-        # Ajustar o tamanho das listas
-        X = np.array(X)
-        y = np.array(y)
-
-        # Aplicar o StandardScaler aos dados
-        X_scaled = self.scaler.fit_transform(X)
-
-        # Treinar o modelo de regressão linear
-        self.modelo_prognostico = LinearRegression()
-        self.modelo_prognostico.fit(X_scaled, y)
-        print("Modelo de prognóstico treinado com sucesso.")
-
-    def gerar_prognostico(self):
-        if not self.modelo_prognostico:
-            print("Modelo não treinado. Treine o modelo antes de gerar prognósticos.")
-            return
-
-        # Obter as features atuais
-        colocacao_atual = self.colocacoes_etapas[-1] or 0
-        variaveis_extras_valores = list(self.variaveis_extras.values()) if self.variaveis_extras else []
-        impacto_extras_valores = list(self.impactos_extras.values()) if self.impactos_extras else []
-
-        features = [colocacao_atual, len(self.treinos_mar), len(self.treinos_academia), self.treino_mar_nota, self.treino_academia_nota] + variaveis_extras_valores + impacto_extras_valores
-
-        # Ajustar o tamanho da lista
-        X_scaled = self.scaler.transform([features])
-
-        # Gerar o prognóstico
-        prognostico = self.modelo_prognostico.predict(X_scaled)[0]
-        print(f"Prognóstico: {prognostico:.2f}")
-        return prognostico
-
-# Configurar Flask-Assets
-assets = Environment(app)
-scss = Bundle('scss/style.scss', filters='pyscss', output='css/style.css')
-assets.register('scss_all', scss)
-
-# Criar uma rota para build dos assets
-@app.route('/build-assets')
-def build_assets():
-    # Build os assets scss_all
-    assets['scss_all'].build()
-    return 'Assets built successfully.'
+    def obter_prognostico(self):
+        if self.modelo_prognostico:
+            X, _ = preparar_dados_prognostico(self.notas_etapas, self.colocacoes_etapas, self.variaveis_extras, self.impactos_extras)
+            previsao = self.modelo_prognostico.predict([[
+                self.colocacoes_etapas[-1] if self.colocacoes_etapas[-1] is not None else 0,
+                len(self.treinos_mar),
+                len(self.treinos_academia),
+                self.treino_mar_nota,
+                self.treino_academia_nota
+            ]])[0]
+            return f"Prognóstico: {previsao:.2f}"
+        else:
+            return "Modelo de prognóstico não treinado. Adicione mais dados."
 
 if __name__ == '__main__':
     app.run(debug=True)
