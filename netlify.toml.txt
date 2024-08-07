@@ -1,5 +1,5 @@
 [build]
-  command = "pip install -r requirements.txt && flask run --host=0.0.0.0 --port=8080" # Inicie o Flask diretamente
+  command = "pip install -r requirements.txt" # Apenas instale as dependências
   publish = "build"  # Diretório onde os arquivos estáticos são gerados
 
 [build.environment]
