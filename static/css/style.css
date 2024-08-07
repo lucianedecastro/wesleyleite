@@ -1,41 +1,134 @@
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f5f5f5; /* Cor de fundo da página */
-    margin: 0; /* Remove a margem padrão do body */
-    color: #333; /* Cor do texto */
-  }
-  
-  h1 {
-    text-align: center;
-    margin-top: 20px;
-    margin-bottom: 10px;
-    color: #2196F3; /* Cor do título */
-  }
-  
-  #menu {
-    background-color: #fff;
-    padding: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Adiciona sombra aos botões */
-  }
-  
-  #menu button {
-    padding: 10px 20px;
-    margin: 5px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px; /* Adiciona cantos arredondados */
-    transition: background-color 0.3s ease; /* Adiciona transição para o background */
-  }
-  
-  #menu button:hover {
-    background-color: #3e8e41; /* Muda a cor do fundo ao passar o mouse */
-  }
-  
-  #conteudo {
-    background-color: #fff;
-    padding: 20px;
-    margin: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
+  font-family: 'Arial', sans-serif;
+  background-color: #f5f5f5; /* Cor de fundo da página */
+  margin: 0; /* Remove a margem padrão do body */
+  color: #333; /* Cor do texto */
+  display: flex; /* Habilita flexbox para centralizar o conteúdo */
+  flex-direction: column; /* Alinha os elementos verticalmente */
+  align-items: center; /* Centraliza os elementos horizontalmente */
+  min-height: 100vh; /* Define a altura mínima do body como a altura da viewport */
+}
+
+h1 {
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #2196F3; /* Cor do título */
+}
+
+#menu {
+  background-color: #fff;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Adiciona sombra aos botões */
+  width: 300px; /* Define a largura do menu */
+  border-radius: 10px; /* Adiciona cantos arredondados ao menu */
+}
+
+#menu button {
+  padding: 10px 20px;
+  margin: 5px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px; /* Adiciona cantos arredondados */
+  transition: background-color 0.3s ease; /* Adiciona transição para o background */
+  width: 100%; /* Define a largura dos botões para ocupar todo o menu */
+  text-align: center; /* Centraliza o texto dos botões */
+}
+
+#menu button:hover {
+  background-color: #3e8e41; /* Muda a cor do fundo ao passar o mouse */
+}
+
+#conteudo {
+  background-color: #fff;
+  padding: 20px;
+  margin: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px; /* Adiciona cantos arredondados ao conteúdo */
+  width: 300px; /* Define a largura do conteúdo */
+}
+
+/* Estilos para a área de prompts */
+.prompt-area {
+  display: none; /* Esconde a área de prompts inicialmente */
+  margin-bottom: 20px;
+}
+
+.prompt-area label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.prompt-area input,
+.prompt-area textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Estilos para o botão "Enviar" */
+.submit-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.submit-button:hover {
+  background-color: #3e8e41;
+}
+
+/* Estilos para o botão "Voltar" */
+.back-button {
+  background-color: #f44336;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-left: 10px;
+}
+
+.back-button:hover {
+  background-color: #d32f2f;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.prompt-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  width: 300px; /* Define a largura da área de prompts */
+}
+
+.prompt-section label {
+  margin-bottom: 5px;
+}
+
+.prompt-section input,
+.prompt-section textarea {
+  padding: 8px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.error {
+  color: red;
+}
