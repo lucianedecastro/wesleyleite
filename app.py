@@ -1,10 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 import json
 import numpy as np
+from flask_assets import Environment, Bundle
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 import logging
-import os
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
@@ -344,4 +344,4 @@ def main():
             print("Opção inválida!")
 
 if __name__ == "__main__":
-    main()
+    app.run(debug=True)
