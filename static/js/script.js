@@ -16,8 +16,20 @@ function registrarTreinoMar() {
       }
     };
   } else {
-    // Mostrar mensagem para o usuário
-    mostrarMensagem("Treino no mar não registrado.");
+    // Enviar dados para o servidor usando AJAX
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/registrar-treino-mar"); 
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhr.send("data=" + prompt("Descreva o treino no mar:")); // Enviar descrição do treino
+
+    // Mostrar mensagem após resposta do servidor
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        mostrarMensagem("Treino no mar registrado com sucesso.");
+      } else {
+        mostrarMensagem("Erro ao registrar treino no mar.");
+      }
+    };
   }
 }
 
@@ -39,8 +51,20 @@ function registrarTreinoAcademia() {
       }
     };
   } else {
-    // Mostrar mensagem para o usuário
-    mostrarMensagem("Treino na academia não registrado.");
+    // Enviar dados para o servidor usando AJAX
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/registrar-treino-academia"); 
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhr.send("data=" + prompt("Descreva o treino na academia:")); // Enviar descrição do treino
+
+    // Mostrar mensagem após resposta do servidor
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        mostrarMensagem("Treino na academia registrado com sucesso.");
+      } else {
+        mostrarMensagem("Erro ao registrar treino na academia.");
+      }
+    };
   }
 }
 
