@@ -6,6 +6,7 @@ from flask_assets import Environment, Bundle
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 import numpy as np
+import datetime
 
 # Criar a pasta build, se não existir
 if not os.path.exists('build'):
