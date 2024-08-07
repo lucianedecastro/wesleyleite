@@ -18,13 +18,13 @@ logging.basicConfig(level=logging.INFO)
 
 # Criar uma estrutura de dados (simulando um banco de dados)
 atleta = {
-    "nome": "Wesley Leite",
-    "treinos_mar": [],
-    "treinos_academia": [],
-    "notas_etapas": [None, None, None, None],
-    "colocacoes_etapas": [None, None, None, None],
-    "variaveis_extras": {},
-    "impactos_extras": {}
+    "nome": os.getenv("ATLETA_NOME", "Wesley Leite"),
+    "treinos_mar": json.loads(os.getenv("TREINOS_MAR", "[]")),
+    "treinos_academia": json.loads(os.getenv("TREINOS_ACADEMIA", "[]")),
+    "notas_etapas": json.loads(os.getenv("NOTAS_ETAPAS", "[null, null, null, null]")),
+    "colocacoes_etapas": json.loads(os.getenv("COLOCACOES_ETAPAS", "[null, null, null, null]")),
+    "variaveis_extras": json.loads(os.getenv("VARIAVEIS_EXTRA", "{}")),
+    "impactos_extras": json.loads(os.getenv("IMPACOS_EXTRA", "{}"))
 }
 
 # Carregar histórico do arquivo JSON (se existir)
@@ -203,27 +203,27 @@ class Atleta:
             print(f"Variável extra '{nome}' com impacto {impacto} registrada.")
             self.treinar_modelo_prognostico()
         else:
-            print("Impacto inválido. Digite um número entre 1 e 5.")
+            print("Impacto deve ser um número entre 1 e 5.")
 
     def treinar_modelo_prognostico(self):
-        if len(self.notas_etapas) >= 4:
-            X, y = preparar_dados_prognostico(self.notas_etapas, self.colocacoes_etapas, self.variaveis_extras, self.impactos_extras)
-            self.modelo_prognostico = criar_modelo_prognostico(X, y)
-            print("Modelo de prognóstico treinado com sucesso.")
+        X, y = preparar_dados_prognostico(
+            self.notas_etapas,
+            self.colocacoes_etapas,
+            self.variaveis_extras,
+            self.impactos_extras
+        )
+        self.modelo_prognostico = criar_modelo_prognostico(X, y)
 
-    def obter_prognostico(self):
-        if self.modelo_prognostico:
-            X, _ = preparar_dados_prognostico(self.notas_etapas, self.colocacoes_etapas, self.variaveis_extras, self.impactos_extras)
-            previsao = self.modelo_prognostico.predict([[
-                self.colocacoes_etapas[-1] if self.colocacoes_etapas[-1] is not None else 0,
-                len(self.treinos_mar),
-                len(self.treinos_academia),
-                self.treino_mar_nota,
-                self.treino_academia_nota
-            ]])[0]
-            return f"Prognóstico: {previsao:.2f}"
-        else:
-            return "Modelo de prognóstico não treinado. Adicione mais dados."
+# Inicializar o objeto Atleta
+atleta_obj = Atleta(nome=atleta["nome"])
+
+# Endpoints para gerenciar a aplicação Flask
+@app.route('/adicionar-variavel-extra', methods=['POST'])
+def adicionar_variavel_extra():
+    nome = request.form.get("nome")
+    impacto = int(request.form.get("impacto"))
+    atleta_obj.adicionar_variavel_extra(nome, impacto)
+    return jsonify({"message": f"Variável extra '{nome}' com impacto {impacto} adicionada com sucesso."})
 
 if __name__ == '__main__':
     app.run(debug=True)
