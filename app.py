@@ -343,5 +343,14 @@ def main():
         else:
             print("Opção inválida!")
 
+# Criar o ambiente Flask-Assets
+assets = Environment(app)
+css = Bundle('style.css', output='build/style.css')
+assets.register('all_css', css)
+
+@app.cli.command('build')
+def build():
+    assets.build('all_css')
+
 if __name__ == "__main__":
     app.run(debug=True)
