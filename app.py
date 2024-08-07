@@ -111,9 +111,9 @@ def preparar_dados_prognostico(notas, colocacoes, variaveis_extras, impactos_ext
     encoder = OneHotEncoder(handle_unknown='ignore', sparse=False)
     features_extras = []
     if variaveis_extras:
-        features_extras = encoder.fit_transform([[valor for valor in variaveis_extras.values()]]).toarray()[0]
+        features_extras = encoder.fit_transform([[valor for valor em variaveis_extras.values()]]).toarray()[0]
 
-    for i, (nota, colocacao) in enumerate(zip(notas, colocacoes)):
+    for i, (nota, colocacao) em enumerate(zip(notas, colocacoes)):
         if nota is not None:
             features = [
                 colocacao,
@@ -138,7 +138,6 @@ def preparar_dados_prognostico(notas, colocacoes, variaveis_extras, impactos_ext
 
 # Criar o modelo de prognóstico
 def criar_modelo_prognostico(X, y):
-
     modelo = LinearRegression()
     modelo.fit(X, y)
 
@@ -199,158 +198,71 @@ class Atleta:
             print(f"Variável extra '{nome}' com impacto {impacto} registrada.")
             self.treinar_modelo_prognostico()
         else:
-            print("Impacto inválido. Digite um número entre 1 e 5.")
+            print("Impacto inválido. Digite um valor entre 1 e 5.")
 
     def treinar_modelo_prognostico(self):
-        """Treina um modelo de regressão linear para prever a próxima nota."""
+        # Preparar os dados para o modelo
+        X = []
+        y = []
 
-        # Verifica se há dados suficientes para treinar o modelo
-        if self.notas_etapas.count(None) > 2:
-            print("Precisa de pelo menos 2 notas de etapas para treinar o modelo.")
-            return
-
-        # Prepara os dados para treinamento
-        X = []  # Lista para armazenar as features
-        y = np.array([nota for nota in self.notas_etapas if nota is not None])  # Notas
-
-        # Obter nomes de variáveis extras
-        self.features_extras_names = list(self.variaveis_extras.keys())
-
-        # Cria o OneHotEncoder aqui, apenas uma vez
-        if self.encoder is None and self.variaveis_extras:
-            self.encoder = OneHotEncoder(handle_unknown='ignore', sparse=False)
-            # Aplica o fit_transform no encoder para criar o esquema de codificação
-            features_extras = self.encoder.fit_transform([[valor for valor in self.variaveis_extras.values()]]).toarray() 
-
-        for i, (nota, colocacao) in enumerate(zip(self.notas_etapas, self.colocacoes_etapas)):
+        for i, nota in enumerate(self.notas_etapas):
             if nota is not None:
-                # Extrai informações de treino
-                treinos_mar_etapa = len([data for data in self.treinos_mar if data == i + 1])
-                treinos_academia_etapa = len([data for data in self.treinos_academia if data == i + 1])
+                colocacao = self.colocacoes_etapas[i] or 0
+                variaveis_extras_valores = list(self.variaveis_extras.values()) if self.variaveis_extras else []
+                impacto_extras_valores = list(self.impactos_extras.values()) if self.impactos_extras else []
 
-                # Cria a lista de features para cada etapa
-                features = [
-                    colocacao,
-                    treinos_mar_etapa,
-                    treinos_academia_etapa,
-                    self.treino_mar_nota,
-                    self.treino_academia_nota
-                ]
-
-                # Adiciona as features para a variável extra (usando One-Hot Encoding)
-                if self.variaveis_extras:
-                    features_extras = self.encoder.transform([[valor for valor in self.variaveis_extras.values()]]).toarray()[0]
-                    features = np.concatenate((features, features_extras), axis=0)  # Concatenar na linha (axis=0)
-                else:
-                    features = np.array(features).reshape(1, -1)
-
+                # Construir o vetor de features
+                features = [colocacao, len(self.treinos_mar), len(self.treinos_academia), self.treino_mar_nota, self.treino_academia_nota] + variaveis_extras_valores + impacto_extras_valores
                 X.append(features)
+                y.append(nota)
 
-        # Transforma a lista de features 'X' em uma matriz NumPy 2D
-        X = np.array(X)
-
-        # Normaliza os dados para melhorar o desempenho do modelo
-        # Aplique o OneHotEncoder primeiro
-        if self.encoder is not None:
-            X[:, 3:] = self.encoder.transform(X[:, 3:])
-
-        # Depois, aplique o StandardScaler APENAS nas features das etapas
-        X[:, :3] = self.scaler.fit_transform(X[:, :3]) # Aplica o StandardScaler nas 3 primeiras colunas
-
-        # Cria o modelo de regressão linear
-        self.modelo_prognostico = LinearRegression()
-        self.modelo_prognostico.fit(X, y)
-
-    def obter_prognostico(self):
-        """Calcula o prognóstico da próxima nota."""
-
-        # Verifica se o modelo está treinado
-        if self.modelo_prognostico is None:
-            print("O modelo de prognóstico ainda não foi treinado.")
+        if not X or not y:
+            print("Dados insuficientes para treinar o modelo.")
             return
 
-        # Prepara os dados para a previsão
-        ultima_etapa = len(self.notas_etapas)
+        # Ajustar o tamanho das listas
+        X = np.array(X)
+        y = np.array(y)
 
-        # Cria a lista de features para a próxima etapa
-        features = [
-            self.colocacoes_etapas[ultima_etapa - 1] if ultima_etapa > 0 else 0,  # Última colocação
-            len([data for data in self.treinos_mar if data == ultima_etapa]),
-            len([data for data in self.treinos_academia if data == ultima_etapa]),
-            self.treino_mar_nota,
-            self.treino_academia_nota
-        ]
+        # Aplicar o StandardScaler aos dados
+        X_scaled = self.scaler.fit_transform(X)
 
-        # Adiciona as features para a variável extra (usando One-Hot Encoding)
-        if self.variaveis_extras:
-            features_extras = self.encoder.transform([[valor for valor in self.variaveis_extras.values()]]).toarray()[0]
-            features = np.concatenate((features, features_extras), axis=0)  # Concatenar na linha (axis=0)
+        # Treinar o modelo de regressão linear
+        self.modelo_prognostico = LinearRegression()
+        self.modelo_prognostico.fit(X_scaled, y)
+        print("Modelo de prognóstico treinado com sucesso.")
 
-        # Normaliza as features
-        features = self.scaler.transform(features)
+    def gerar_prognostico(self):
+        if not self.modelo_prognostico:
+            print("Modelo não treinado. Treine o modelo antes de gerar prognósticos.")
+            return
 
-        # Utiliza o modelo para prever a próxima nota
-        prognostico = self.modelo_prognostico.predict(features)[0]
-        
-        # Formata e exibe o prognóstico
-        print(f"Prognóstico da próxima nota: {prognostico:.2f}")
+        # Obter as features atuais
+        colocacao_atual = self.colocacoes_etapas[-1] or 0
+        variaveis_extras_valores = list(self.variaveis_extras.values()) if self.variaveis_extras else []
+        impacto_extras_valores = list(self.impactos_extras.values()) if self.impactos_extras else []
+
+        features = [colocacao_atual, len(self.treinos_mar), len(self.treinos_academia), self.treino_mar_nota, self.treino_academia_nota] + variaveis_extras_valores + impacto_extras_valores
+
+        # Ajustar o tamanho da lista
+        X_scaled = self.scaler.transform([features])
+
+        # Gerar o prognóstico
+        prognostico = self.modelo_prognostico.predict(X_scaled)[0]
+        print(f"Prognóstico: {prognostico:.2f}")
         return prognostico
 
-def main():
-    atleta = Atleta("Wesley Leite")
-
-    while True:
-        print("\nMenu:")
-        print("1. Registrar treino no mar")
-        print("2. Registrar treino na academia")
-        print("3. Adicionar informações da etapa:") # Menu 3 modificado
-        print("4. Obter prognóstico") # Menu 4 reajustado
-        print("5. Sair") # Menu 5 reajustado
-
-        opcao = input("Digite a opção desejada: ")
-
-        if opcao == "1":
-            atleta.registrar_treino_mar()
-        elif opcao == "2":
-            atleta.registrar_treino_academia()
-        elif opcao == "3":
-            while True:
-                etapa = input("Digite o número da etapa (1-4) ou 'sair' para voltar ao menu: ")
-                if etapa == "sair": # Corrigido para comparar com a string 'sair'
-                    break
-                etapa = int(etapa) # Converter para inteiro após a comparação
-                nota = float(input("Digite a nota: "))
-                colocacao = input("Digite a colocação: ") # Recebe a colocação como string
-                if colocacao.isdigit() and int(colocacao) >= 1: # Valida se a colocação é um número válido
-                    colocacao = int(colocacao) # Converte para inteiro após a validação
-                    atleta.adicionar_nota_etapa(etapa, nota, colocacao)
-                else:
-                    print("Colocação inválida. Digite um número inteiro maior ou igual a 1.")
-                while True:
-                    adicionar_variavel = input("Deseja adicionar variável extra? (sim/não): ")
-                    if adicionar_variavel.lower() == "sim":
-                        nome = input("Digite o nome da variável extra: ")
-                        impacto = int(input("Digite o impacto (1-5): "))
-                        atleta.adicionar_variavel_extra(nome, impacto)
-                    elif adicionar_variavel.lower() == "não":
-                        break
-                    else:
-                        print("Opção inválida. Digite 'sim' ou 'não'.")
-        elif opcao == "4":
-            atleta.obter_prognostico()
-        elif opcao == "5":
-            break
-        else:
-            print("Opção inválida!")
-
-# Criar o ambiente Flask-Assets
+# Configurar Flask-Assets
 assets = Environment(app)
-css = Bundle('style.css', output='build/style.css')
-assets.register('all_css', css)
+scss = Bundle('scss/style.scss', filters='pyscss', output='css/style.css')
+assets.register('scss_all', scss)
 
-@app.cli.command('build')
-def build():
-    assets.build('all_css') 
+# Criar uma rota para build dos assets
+@app.route('/build-assets')
+def build_assets():
+    # Build os assets scss_all
+    assets['scss_all'].build()
+    return 'Assets built successfully.'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
